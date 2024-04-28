@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Envíos de Elementos Tecnológicos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container mt-5" id="login-page">
+    <h2 class="text-center mb-4">Iniciar Sesión</h2>
+    <div class="form-group">
+        <label for="usuario">Usuario:</label>
+        <input type="text" id="usuario" class="form-control" placeholder="Usuario">
+    </div>
+    <div class="form-group">
+        <label for="contrasena">Contraseña:</label>
+        <input type="password" id="contrasena" class="form-control" placeholder="Contraseña">
+    </div>
+    <div class="text-center">
+        <button onclick="iniciarSesion()" class="btn btn-primary">Iniciar Sesión</button>
+    </div>
+</div>
+
+<div class="container mt-5" id="envios-page" style="display: none;">
+    
+    <h2 class="text-center mb-4">Control de Envíos de Elementos Tecnológicos</h2>
+    <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" class="form-control" placeholder="Descripción del producto" required>
+    </div>
+    <div class="form-group">
+        <label for="archivo">Evidencias Fotográficas:</label>
+        <input type="file" id="archivo" class="form-control-file" accept="image/jpeg,image/png" required>
+    </div>
+    <div class="form-group">
+        <label for="serial">Serial:</label>
+        <input type="text" id="serial" class="form-control" placeholder="Serial del producto" required>
+    </div>
+    <div class="form-group">
+        <label for="placa">Placa:</label>
+        <input type="text" id="placa" class="form-control" placeholder="Placa del producto" required>
+    </div>
+    <div class="form-group">
+        <label for="destino">Destino:</label>
+        <input type="text" id="destino" class="form-control" placeholder="Destino del envío" required>
+    </div>
+    <div class="form-group">
+        <label for="responsable">Analista Responsable:</label>
+        <input type="text" id="responsable" class="form-control" placeholder="Nombre del analista responsable" required>
+    </div>
+    <div class="text-center">
+        <button id="btnAgregarEnvio" onclick="agregarEnvio()" class="btn btn-primary">Agregar Envío</button>
+        <button id="btnImprimirEnvios" onclick="imprimirEnvios()" class="btn btn-secondary">Imprimir Envíos</button>
+        <button id="btnLimpiarEnvios" onclick="limpiarEnvios()" class="btn btn-danger">Limpiar Envíos</button>
+        <button id="btnCerrarSesion" onclick="cerrarSesion()" class="btn btn-warning">Cerrar Sesión</button>
+    </div>
+</div>
+<div id="envios-list" class="container mt-5">
+    <h2 class="text-center mb-4">Envíos Realizados</h2>
+</div>
+
+<script>
+    var envios = []; 
+
+    function iniciarSesion() {
+        var usuario = document.getElementById("usuario").value;
+        var contrasena = document.getElementById("contrasena").value;
+
+      
+        if (usuario === "admin" && contrasena === "admin") {
+            
+            document.getElementById("login-page").style.display = "none";
+            document.getElementById("envios-page").style.display = "block";
+        } else {
+            alert("Usuario o contraseña incorrectos");
+        }
+    }
+
+    function agregarEnvio() {
+        var descripcion = document.getElementById("descripcion").value;
+        var archivo = document.getElementById("archivo").files[0]; // Obtenemos el archivo seleccionado
+        var serial = document.getElementById("serial").value;
+        var placa = document.getElementById("placa").value;
+        var destino = document.getElementById("destino").value;
+        var responsable = document.getElementById("responsable").value;
+      
+        if (descripcion === "" || !archivo || serial === "" || placa === "" || destino === "" || responsable === "") {
+            alert("Por favor, complete todos los campos.");
+            return; 
+        }
+        
+        var envio = {
+            descripcion: descripcion,
+            archivo: archivo,
+            serial: serial,
+            placa: placa,
+            destino: destino,
+            responsable: responsable
+        };
+
+        envios.push(envio);
+     
+        actualizarEnvios();
+      
+        document.getElementById("descripcion").value = "";
+        document.getElementById("archivo").value = "";
+        document.getElementById("serial").value = "";
+        document.getElementById("placa").value = "";
+        document.getElementById("destino").value = "";
+        document.getElementById("responsable").value = "";
+    }
+
+    function imprimirEnvios() {
+        var printWindow = window.open('', '_blank');
+        var html = "<html><head><title>Envíos Realizados</title></head><body>";
+        html += "<h2 class='text-center mb-4'>Envíos Realizados</h2>";
+        envios.forEach(function(envio, index) {
+            html += `
+                <div class="envio">
+                    <strong>Envío ${index + 1}:</strong><br>
+                    <strong>Descripción:</strong> ${envio.descripcion}<br>
+                    <strong>Archivo:</strong> <a href="${URL.createObjectURL(envio.archivo)}" download>Evidencia Fotográfica</a><br>
+                    <strong>Serial:</strong> ${envio.serial}<br>
+                    <strong>Placa:</strong> ${envio.placa}<br>
+                    <strong>Destino:</strong> ${envio.destino}<br>
+                    <strong>Analista Responsable:</strong> ${envio.responsable}
+                </div>
+            `;
+        });
+        html += "</body></html>";
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+    }
+
+    function limpiarEnvios() {
+        envios = []; 
+        actualizarEnvios(); 
+    }
+
+    function cerrarSesion() { 
+        document.getElementById("login-page").style.display = "block";
+        document.getElementById("envios-page").style.display = "none";
+        document.getElementById("usuario").value = ""; 
+        document.getElementById("contrasena").value = ""; 
+    }
+
+    function actualizarEnvios() {
+        var enviosList = document.getElementById("envios-list");
+        enviosList.innerHTML = "<h2 class='text-center mb-4'>Envíos Realizados</h2>";
+
+        envios.forEach(function(envio, index) {
+            var envioHtml = `
+                <div class="envio">
+                    <strong>Envío ${index + 1}:</strong><br>
+                    <strong>Descripción:</strong> ${envio.descripcion}<br>
+                    <strong>Archivo:</strong> <a href="${URL.createObjectURL(envio.archivo)}" download>Evidencia Fotográfica</a><br>
+                    <strong>Serial:</strong> ${envio.serial}<br>
+                    <strong>Placa:</strong> ${envio.placa}<br>
+                    <strong>Destino:</strong> ${envio.destino}<br>
+                    <strong>Analista Responsable:</strong> ${envio.responsable}
+                </div>
+            `;
+            enviosList.innerHTML += envioHtml;
+        });
+    }
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+</body>
+</html>
